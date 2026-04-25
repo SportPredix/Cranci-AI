@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = ChatViewModel()
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         ZStack {
