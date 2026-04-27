@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")"
 
 WORKING_LOCATION="$(pwd)"
-APPLICATION_NAME=bocco
+APPLICATION_NAME=cranci-AI
 
 if [ ! -d "build" ]; then
     mkdir build
@@ -35,8 +35,8 @@ fi
 
 
 mkdir Payload
-cp -r bocco.app Payload/bocco.app
-strip Payload/bocco.app/bocco
-zip -vr bocco.ipa Payload
-rm -rf bocco.app
+cp -r cranci-AI.app Payload/cranci-AI.app
+strip Payload/cranci-AI.app/cranci-AI
+zip -vr cranci-AI.ipa Payload
+rm -rf cranci-AI.app
 rm -rf Payload
