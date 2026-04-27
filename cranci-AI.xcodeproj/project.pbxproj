@@ -16,7 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		131827D82F818D6E00DE3FF6 /* bocco.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bocco.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		131827D82F818D6E00DE3FF6 /* cranci-AI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "cranci-AI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		131827DB2F818D6E00DE3FF6 /* boccoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = boccoApp.swift; sourceTree = "<group>"; };
 		131827DD2F818D6E00DE3FF6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		131827DF2F818D7400DE3FF6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -39,7 +39,7 @@
 		131827CF2F818D6E00DE3FF6 = {
 			isa = PBXGroup;
 			children = (
-				131827DA2F818D6E00DE3FF6 /* bocco */,
+				131827DA2F818D6E00DE3FF6 /* cranci-AI */,
 				131827D92F818D6E00DE3FF6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -47,12 +47,12 @@
 		131827D92F818D6E00DE3FF6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				131827D82F818D6E00DE3FF6 /* bocco.app */,
+				131827D82F818D6E00DE3FF6 /* cranci-AI.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		131827DA2F818D6E00DE3FF6 /* bocco */ = {
+		131827DA2F818D6E00DE3FF6 /* cranci-AI */ = {
 			isa = PBXGroup;
 			children = (
 				C1913BDF2F9F998F00DDA6CD /* ChatViewModel.swift */,
@@ -62,7 +62,7 @@
 				131827DF2F818D7400DE3FF6 /* Assets.xcassets */,
 				131827E12F818D7400DE3FF6 /* Preview Content */,
 			);
-			path = bocco;
+			path = "cranci-AI";
 			sourceTree = "<group>";
 		};
 		131827E12F818D7400DE3FF6 /* Preview Content */ = {
@@ -76,9 +76,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		131827D72F818D6E00DE3FF6 /* bocco */ = {
+		131827D72F818D6E00DE3FF6 /* cranci-AI */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 131827E62F818D7400DE3FF6 /* Build configuration list for PBXNativeTarget "bocco" */;
+			buildConfigurationList = 131827E62F818D7400DE3FF6 /* Build configuration list for PBXNativeTarget "cranci-AI" */;
 			buildPhases = (
 				131827D42F818D6E00DE3FF6 /* Sources */,
 				131827D52F818D6E00DE3FF6 /* Frameworks */,
@@ -88,9 +88,9 @@
 			);
 			dependencies = (
 			);
-			name = bocco;
+			name = "cranci-AI";
 			productName = bocco;
-			productReference = 131827D82F818D6E00DE3FF6 /* bocco.app */;
+			productReference = 131827D82F818D6E00DE3FF6 /* cranci-AI.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -108,7 +108,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 131827D32F818D6E00DE3FF6 /* Build configuration list for PBXProject "bocco" */;
+			buildConfigurationList = 131827D32F818D6E00DE3FF6 /* Build configuration list for PBXProject "cranci-AI" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -121,7 +121,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				131827D72F818D6E00DE3FF6 /* bocco */,
+				131827D72F818D6E00DE3FF6 /* cranci-AI */,
 			);
 		};
 /* End PBXProject section */
@@ -333,7 +333,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		131827D32F818D6E00DE3FF6 /* Build configuration list for PBXProject "bocco" */ = {
+		131827D32F818D6E00DE3FF6 /* Build configuration list for PBXProject "cranci-AI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				131827E42F818D7400DE3FF6 /* Debug */,
@@ -342,7 +342,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		131827E62F818D7400DE3FF6 /* Build configuration list for PBXNativeTarget "bocco" */ = {
+		131827E62F818D7400DE3FF6 /* Build configuration list for PBXNativeTarget "cranci-AI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				131827E72F818D7400DE3FF6 /* Debug */,
