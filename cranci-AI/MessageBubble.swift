@@ -73,9 +73,7 @@ struct MessageBubble: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(message.content)
-                    .font(.body)
-                    .foregroundStyle(.white)
+                MarkdownText(content: message.content, isUser: false)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background {
