@@ -25,5 +25,5 @@ jobs:
       - name: Upload iOS IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bocco
-          path: build/bocco.ipa
+          name: cranci-AI
+          path: build/cranci-AI.ipa
