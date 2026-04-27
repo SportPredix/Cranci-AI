@@ -11,6 +11,7 @@
 		131827DE2F818D6E00DE3FF6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 131827DD2F818D6E00DE3FF6 /* ContentView.swift */; };
 		131827E02F818D7400DE3FF6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 131827DF2F818D7400DE3FF6 /* Assets.xcassets */; };
 		131827E32F818D7400DE3FF6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 131827E22F818D7400DE3FF6 /* Preview Assets.xcassets */; };
+		C18C45672F9FA6710091D8CC /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C45662F9FA6710091D8CC /* MarkdownText.swift */; };
 		C1913BE12F9F998F00DDA6CD /* MessageBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1913BE02F9F998F00DDA6CD /* MessageBubble.swift */; };
 		C1913BE22F9F998F00DDA6CD /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1913BDF2F9F998F00DDA6CD /* ChatViewModel.swift */; };
 /* End PBXBuildFile section */
@@ -21,6 +22,7 @@
 		131827DD2F818D6E00DE3FF6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		131827DF2F818D7400DE3FF6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		131827E22F818D7400DE3FF6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		C18C45662F9FA6710091D8CC /* MarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownText.swift; sourceTree = "<group>"; };
 		C1913BDF2F9F998F00DDA6CD /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		C1913BE02F9F998F00DDA6CD /* MessageBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubble.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,6 +57,7 @@
 		131827DA2F818D6E00DE3FF6 /* cranci-AI */ = {
 			isa = PBXGroup;
 			children = (
+				C18C45662F9FA6710091D8CC /* MarkdownText.swift */,
 				C1913BDF2F9F998F00DDA6CD /* ChatViewModel.swift */,
 				C1913BE02F9F998F00DDA6CD /* MessageBubble.swift */,
 				131827DB2F818D6E00DE3FF6 /* boccoApp.swift */,
@@ -145,6 +148,7 @@
 			files = (
 				131827DE2F818D6E00DE3FF6 /* ContentView.swift in Sources */,
 				131827DC2F818D6E00DE3FF6 /* boccoApp.swift in Sources */,
+				C18C45672F9FA6710091D8CC /* MarkdownText.swift in Sources */,
 				C1913BE12F9F998F00DDA6CD /* MessageBubble.swift in Sources */,
 				C1913BE22F9F998F00DDA6CD /* ChatViewModel.swift in Sources */,
 			);
