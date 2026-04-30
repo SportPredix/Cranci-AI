@@ -11,6 +11,9 @@ struct ContentView: View {
     @StateObject private var viewModel = ChatViewModel()
     @FocusState private var isFocused: Bool
     @State private var sidebarPresented = false
+    @GestureState private var sidebarDragOffset: CGFloat = 0
+
+    private let sidebarWidth: CGFloat = 280
 
     // Vibrant gradient background colors
     private let gradientColors: [Color] = [
@@ -32,7 +35,7 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 GlassHeader(
                     onNewChat: { viewModel.createNewChat() },
-                    onMenuTap: { sidebarPresented.toggle() }
+                    onMenuTap: { toggleSidebar() }
                 )
 
                 // — Messages —
@@ -91,9 +94,11 @@ struct ContentView: View {
             if sidebarPresented {
                 ZStack(alignment: .topLeading) {
                     // Backdrop
-                    Color.black.opacity(0.4)
+                    Color.black
+                        .opacity(backdropOpacity(for: clampedSidebarDragOffset))
                         .ignoresSafeArea()
-                        .onTapGesture { sidebarPresented = false }
+                        .transition(.opacity)
+                        .onTapGesture { dismissSidebar() }
                     
                     // Sidebar
                     ChatHistorySidebar(
@@ -101,34 +106,80 @@ struct ContentView: View {
                         currentChatID: viewModel.currentChatID,
                         onSelectChat: { chatID in
                             viewModel.loadChat(chatID)
-                            sidebarPresented = false
+                            dismissSidebar()
                         },
                         onDeleteChat: { chatID in
                             viewModel.deleteChat(chatID)
                         },
-                        onClose: { sidebarPresented = false }
+                        onClose: { dismissSidebar() }
                     )
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                // Swipe da destra verso sinistra per chiudere
-                                if value.translation.width < -50 {
-                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                        sidebarPresented = false
-                                    }
-                                }
-                            }
-                    )
+                    .offset(x: clampedSidebarDragOffset)
+                    .simultaneousGesture(sidebarCloseGesture)
                     .transition(.asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .scale(scale: 0.9, anchor: .leading)).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .scale(scale: 0.9, anchor: .leading)).combined(with: .opacity)
+                        insertion: .move(edge: .leading)
+                            .combined(with: .scale(scale: 0.96, anchor: .leading))
+                            .combined(with: .opacity),
+                        removal: .move(edge: .leading)
+                            .combined(with: .scale(scale: 0.96, anchor: .leading))
+                            .combined(with: .opacity)
                     ))
-                    .animation(.interactiveSpring(response: 0.5, dampingFraction: 0.8, blendDuration: 0.3), value: sidebarPresented)
+                    .animation(sidebarAnimation, value: sidebarDragOffset)
                 }
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: sidebarPresented)
+                .transition(.opacity)
             }
         }
+        .animation(sidebarAnimation, value: sidebarPresented)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
+    }
+
+    private var sidebarAnimation: Animation {
+        .interactiveSpring(response: 0.36, dampingFraction: 0.86, blendDuration: 0.2)
+    }
+
+    private var clampedSidebarDragOffset: CGFloat {
+        min(0, sidebarDragOffset)
+    }
+
+    private var sidebarCloseGesture: some Gesture {
+        DragGesture(minimumDistance: 10, coordinateSpace: .local)
+            .updating($sidebarDragOffset) { value, state, _ in
+                let isMostlyHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                guard isMostlyHorizontal, value.translation.width < 0 else { return }
+                state = value.translation.width
+            }
+            .onEnded { value in
+                let isMostlyHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                guard isMostlyHorizontal else { return }
+
+                let predictedOffset = min(0, value.predictedEndTranslation.width)
+                let closeByDistance = value.translation.width < -(sidebarWidth * 0.28)
+                let closeByVelocity = predictedOffset < -(sidebarWidth * 0.45)
+
+                if closeByDistance || closeByVelocity {
+                    dismissSidebar()
+                }
+            }
+    }
+
+    private func toggleSidebar() {
+        sidebarPresented ? dismissSidebar() : presentSidebar()
+    }
+
+    private func presentSidebar() {
+        withAnimation(sidebarAnimation) {
+            sidebarPresented = true
+        }
+    }
+
+    private func dismissSidebar() {
+        withAnimation(sidebarAnimation) {
+            sidebarPresented = false
+        }
+    }
+
+    private func backdropOpacity(for dragOffset: CGFloat) -> Double {
+        let progress = min(max(abs(dragOffset) / sidebarWidth, 0), 1)
+        return 0.4 * (1 - progress * 0.85)
     }
 }
 
@@ -212,6 +263,8 @@ struct ChatHistorySidebar: View {
     let onSelectChat: (UUID) -> Void
     let onDeleteChat: (UUID) -> Void
     let onClose: () -> Void
+
+    @State private var contentVisible = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -234,6 +287,9 @@ struct ChatHistorySidebar: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            .opacity(contentVisible ? 1 : 0)
+            .offset(x: contentVisible ? 0 : -12)
+            .animation(.spring(response: 0.35, dampingFraction: 0.9), value: contentVisible)
             
             Divider()
                 .background(.white.opacity(0.1))
@@ -248,14 +304,14 @@ struct ChatHistorySidebar: View {
                             onSelect: { onSelectChat(session.id) },
                             onDelete: { onDeleteChat(session.id) }
                         )
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .leading)
-                                .combined(with: .opacity)
-                                .combined(with: .scale(scale: 0.8, anchor: .leading)),
-                            removal: .opacity
-                        ))
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8)
-                            .delay(Double(index) * 0.05), value: chatSessions.count)
+                        .opacity(contentVisible ? 1 : 0)
+                        .offset(x: contentVisible ? 0 : -18)
+                        .scaleEffect(contentVisible ? 1 : 0.97, anchor: .leading)
+                        .animation(
+                            .spring(response: 0.38, dampingFraction: 0.86)
+                                .delay(Double(index) * 0.04),
+                            value: contentVisible
+                        )
                     }
                 }
                 .padding(.vertical, 8)
@@ -271,17 +327,14 @@ struct ChatHistorySidebar: View {
                 .fill(.white.opacity(0.08))
                 .frame(width: 0.5)
         }
-        .gesture(
-            DragGesture()
-                .onEnded { value in
-                    // Swipe verso sinistra ( < -50) per chiudere
-                    if value.translation.width < -50 {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            onClose()
-                        }
-                    }
+        .onAppear {
+            contentVisible = false
+            DispatchQueue.main.async {
+                withAnimation(.spring(response: 0.38, dampingFraction: 0.9)) {
+                    contentVisible = true
                 }
-        )
+            }
+        }
     }
 }
 
@@ -466,13 +519,56 @@ struct TypingIndicator: View {
 
 struct MeshBackground: View {
     let colors: [Color]
+    @State private var animateBackground = false
 
     var body: some View {
-        LinearGradient(
-            colors: colors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            LinearGradient(
+                colors: animatedGradientColors,
+                startPoint: animateBackground ? .topLeading : UnitPoint(x: 0.85, y: 0.15),
+                endPoint: animateBackground ? UnitPoint(x: 0.2, y: 1.1) : .bottomTrailing
+            )
+            .scaleEffect(animateBackground ? 1.12 : 1.0)
+
+            RadialGradient(
+                colors: [
+                    .cyan.opacity(0.18),
+                    .clear
+                ],
+                center: animateBackground ? UnitPoint(x: 0.82, y: 0.22) : UnitPoint(x: 0.2, y: 0.78),
+                startRadius: 10,
+                endRadius: 260
+            )
+            .blur(radius: 20)
+            .blendMode(.screen)
+
+            RadialGradient(
+                colors: [
+                    .purple.opacity(0.16),
+                    .clear
+                ],
+                center: animateBackground ? UnitPoint(x: 0.18, y: 0.85) : UnitPoint(x: 0.72, y: 0.28),
+                startRadius: 10,
+                endRadius: 300
+            )
+            .blur(radius: 28)
+            .blendMode(.plusLighter)
+        }
+        .hueRotation(.degrees(animateBackground ? 8 : -6))
+        .animation(.easeInOut(duration: 12).repeatForever(autoreverses: true), value: animateBackground)
+        .onAppear {
+            animateBackground = true
+        }
+    }
+
+    private var animatedGradientColors: [Color] {
+        animateBackground
+            ? [
+                colors[1],
+                colors[2],
+                colors[0]
+            ]
+            : colors
     }
 }
 
