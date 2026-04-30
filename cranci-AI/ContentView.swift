@@ -891,12 +891,12 @@ struct MeshBackground: View {
     let theme: AppTheme
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 24.0, paused: false)) { context in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
             let time = context.date.timeIntervalSinceReferenceDate
-            let primaryWave = CGFloat(normalizedWave(sin(time * 0.26)))
-            let secondaryWave = CGFloat(normalizedWave(cos(time * 0.21)))
-            let tertiaryWave = CGFloat(normalizedWave(sin(time * 0.34)))
-            let quaternaryWave = CGFloat(normalizedWave(cos(time * 0.29)))
+            let primaryWave = CGFloat(normalizedWave(sin(time * 0.42)))
+            let secondaryWave = CGFloat(normalizedWave(cos(time * 0.34)))
+            let tertiaryWave = CGFloat(normalizedWave(sin(time * 0.56)))
+            let quaternaryWave = CGFloat(normalizedWave(cos(time * 0.48)))
 
             ZStack {
                 LinearGradient(
@@ -904,80 +904,84 @@ struct MeshBackground: View {
                         theme.backgroundColors[0],
                         theme.backgroundColors[1],
                         theme.backgroundColors[2],
-                        theme.accentColors[1].opacity(0.78)
+                        theme.accentColors[1].opacity(0.92)
                     ],
                     startPoint: UnitPoint(
-                        x: 0.03 + 0.76 * primaryWave,
-                        y: 0.04 + 0.30 * secondaryWave
+                        x: 0.02 + 0.92 * primaryWave,
+                        y: 0.02 + 0.42 * secondaryWave
                     ),
                     endPoint: UnitPoint(
-                        x: 0.98 - 0.66 * tertiaryWave,
-                        y: 0.98 - 0.40 * quaternaryWave
+                        x: 1.02 - 0.82 * tertiaryWave,
+                        y: 1.02 - 0.54 * quaternaryWave
                     )
                 )
-                .scaleEffect(1.22 + 0.10 * secondaryWave)
+                .scaleEffect(1.30 + 0.16 * secondaryWave)
 
                 Ellipse()
                     .fill(
                         RadialGradient(
-                            colors: [theme.primaryGlowColor.opacity(0.36), .clear],
+                            colors: [theme.primaryGlowColor.opacity(0.50), .clear],
                             center: .center,
                             startRadius: 0,
-                            endRadius: 250
+                            endRadius: 300
                         )
                     )
                     .frame(
-                        width: 450 + 110 * tertiaryWave,
-                        height: 370 + 80 * primaryWave
+                        width: 540 + 180 * tertiaryWave,
+                        height: 430 + 140 * primaryWave
                     )
                     .offset(
-                        x: -200 + 250 * primaryWave,
-                        y: -240 + 190 * secondaryWave
+                        x: -260 + 360 * primaryWave,
+                        y: -280 + 260 * secondaryWave
                     )
-                    .blur(radius: 26)
+                    .blur(radius: 34)
                     .blendMode(.screen)
 
                 Ellipse()
                     .fill(
                         RadialGradient(
-                            colors: [theme.secondaryGlowColor.opacity(0.30), .clear],
+                            colors: [theme.secondaryGlowColor.opacity(0.42), .clear],
                             center: .center,
                             startRadius: 0,
-                            endRadius: 290
+                            endRadius: 340
                         )
                     )
                     .frame(
-                        width: 500 + 110 * quaternaryWave,
-                        height: 400 + 90 * tertiaryWave
+                        width: 620 + 180 * quaternaryWave,
+                        height: 470 + 150 * tertiaryWave
                     )
                     .offset(
-                        x: 190 - 270 * secondaryWave,
-                        y: 280 - 210 * tertiaryWave
+                        x: 250 - 380 * secondaryWave,
+                        y: 340 - 290 * tertiaryWave
                     )
-                    .blur(radius: 32)
+                    .blur(radius: 36)
                     .blendMode(.plusLighter)
 
                 AngularGradient(
                     colors: [
                         .clear,
-                        theme.tertiaryGlowColor.opacity(0.22),
-                        theme.primaryGlowColor.opacity(0.28),
+                        theme.tertiaryGlowColor.opacity(0.30),
+                        theme.primaryGlowColor.opacity(0.38),
                         .clear,
-                        theme.secondaryGlowColor.opacity(0.22),
+                        theme.secondaryGlowColor.opacity(0.30),
                         .clear
                     ],
                     center: UnitPoint(
-                        x: 0.50 + 0.20 * CGFloat(sin(time * 0.12)),
-                        y: 0.48 + 0.14 * CGFloat(cos(time * 0.16))
+                        x: 0.50 + 0.28 * CGFloat(sin(time * 0.18)),
+                        y: 0.48 + 0.20 * CGFloat(cos(time * 0.22))
                     )
                 )
-                .scaleEffect(1.40 + 0.06 * primaryWave)
-                .blur(radius: 78)
-                .opacity(0.98)
+                .scaleEffect(1.55 + 0.12 * primaryWave)
+                .blur(radius: 88)
+                .opacity(1)
             }
-            .hueRotation(.degrees(sin(time * 0.11) * 20))
-            .saturation(1.20)
-            .contrast(1.05)
+            .offset(
+                x: CGFloat(sin(time * 0.24)) * 28,
+                y: CGFloat(cos(time * 0.19)) * 22
+            )
+            .hueRotation(.degrees(sin(time * 0.16) * 28))
+            .saturation(1.30)
+            .contrast(1.10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -998,54 +1002,54 @@ struct AmbientOrbs: View {
             Ellipse()
                 .fill(
                     RadialGradient(
-                        colors: [theme.secondaryGlowColor.opacity(0.35), .clear],
+                        colors: [theme.secondaryGlowColor.opacity(0.46), .clear],
                         center: .center,
                         startRadius: 0,
-                        endRadius: 220
+                        endRadius: 260
                     )
                 )
-                .frame(width: 360, height: 360)
+                .frame(width: 420, height: 420)
                 .offset(
-                    x: -120 + 34 * CGFloat(cos(orbitPhase)),
-                    y: -200 + 28 * CGFloat(sin(orbitPhase))
+                    x: -120 + 72 * CGFloat(cos(orbitPhase)),
+                    y: -200 + 56 * CGFloat(sin(orbitPhase))
                 )
-                .scaleEffect(1 + 0.08 * CGFloat(sin(orbitPhase)))
+                .scaleEffect(1 + 0.16 * CGFloat(sin(orbitPhase)))
 
             Ellipse()
                 .fill(
                     RadialGradient(
-                        colors: [theme.tertiaryGlowColor.opacity(0.32), .clear],
+                        colors: [theme.tertiaryGlowColor.opacity(0.42), .clear],
                         center: .center,
                         startRadius: 0,
-                        endRadius: 210
+                        endRadius: 250
                     )
                 )
-                .frame(width: 310, height: 310)
+                .frame(width: 380, height: 380)
                 .offset(
-                    x: 160 + 44 * CGFloat(sin(orbitPhase)),
-                    y: 350 - 30 * CGFloat(cos(orbitPhase))
+                    x: 160 + 88 * CGFloat(sin(orbitPhase)),
+                    y: 350 - 64 * CGFloat(cos(orbitPhase))
                 )
-                .scaleEffect(1 + 0.10 * CGFloat(cos(orbitPhase)))
+                .scaleEffect(1 + 0.18 * CGFloat(cos(orbitPhase)))
 
             Ellipse()
                 .fill(
                     RadialGradient(
-                        colors: [theme.primaryGlowColor.opacity(0.18), .clear],
+                        colors: [theme.primaryGlowColor.opacity(0.28), .clear],
                         center: .center,
                         startRadius: 0,
-                        endRadius: 140
+                        endRadius: 180
                     )
                 )
-                .frame(width: 220, height: 220)
+                .frame(width: 280, height: 280)
                 .offset(
-                    x: 80 + 26 * CGFloat(sin(orbitPhase)),
-                    y: 18 * CGFloat(cos(orbitPhase))
+                    x: 80 + 54 * CGFloat(sin(orbitPhase)),
+                    y: 26 * CGFloat(cos(orbitPhase))
                 )
-                .scaleEffect(1.02 + 0.20 * CGFloat(sin(orbitPhase)))
+                .scaleEffect(1.05 + 0.28 * CGFloat(sin(orbitPhase)))
         }
         .onAppear {
             guard rotation == 0 else { return }
-            withAnimation(.linear(duration: 10).repeatForever(autoreverses: false)) {
+            withAnimation(.linear(duration: 6.5).repeatForever(autoreverses: false)) {
                 rotation = 360
             }
         }
