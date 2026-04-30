@@ -113,16 +113,19 @@ struct ContentView: View {
                             .onEnded { value in
                                 // Swipe da destra verso sinistra per chiudere
                                 if value.translation.width < -50 {
-                                    sidebarPresented = false
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                        sidebarPresented = false
+                                    }
                                 }
                             }
                     )
                     .transition(.asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .scale(scale: 0.95)).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .scale(scale: 0.95)).combined(with: .opacity)
+                        insertion: .move(edge: .leading).combined(with: .scale(scale: 0.9, anchor: .leading)).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .scale(scale: 0.9, anchor: .leading)).combined(with: .opacity)
                     ))
+                    .animation(.interactiveSpring(response: 0.5, dampingFraction: 0.8, blendDuration: 0.3), value: sidebarPresented)
                 }
-                .animation(.spring(response: 0.6, dampingFraction: 0.75), value: sidebarPresented)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: sidebarPresented)
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
@@ -169,7 +172,7 @@ struct GlassHeader: View {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 6, height: 6)
-                    Text("Powered by Mistral")
+                    Text("Powered by Formatiks")
                         .font(.caption2)
                         .foregroundStyle(.white.opacity(0.7))
                 }
