@@ -108,8 +108,12 @@ struct ContentView: View {
                         },
                         onClose: { sidebarPresented = false }
                     )
-                    .transition(.move(edge: .leading))
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
                 }
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: sidebarPresented)
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
@@ -263,28 +267,17 @@ struct ChatHistoryRow: View {
     var body: some View {
         ZStack(alignment: .trailing) {
             Button(action: onSelect) {
-                HStack(alignment: .top, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(session.title)
-                            .font(.system(.caption, design: .default))
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                        
-                        Text(session.getPreview())
-                            .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.6))
-                            .lineLimit(1)
-                        
-                        Text(formatDate(session.lastModified))
-                            .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.5))
-                    }
+                HStack(alignment: .center, spacing: 10) {
+                    Text(session.title)
+                        .font(.system(.body, design: .default))
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
                     
                     Spacer()
                 }
                 .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     isSelected
@@ -317,12 +310,6 @@ struct ChatHistoryRow: View {
         } message: {
             Text("Are you sure you want to delete this chat?")
         }
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM HH:mm"
-        return formatter.string(from: date)
     }
 }
 
@@ -459,6 +446,8 @@ struct MeshBackground: View {
 }
 
 struct AmbientOrbs: View {
+    @State private var rotation: Double = 0
+
     var body: some View {
         ZStack {
             // Top-left purple orb
@@ -483,7 +472,7 @@ struct AmbientOrbs: View {
                 .frame(width: 300, height: 300)
                 .offset(x: 160, y: 350)
 
-            // Center cyan accent
+            // Center cyan accent - animato
             Ellipse()
                 .fill(
                     RadialGradient(colors: [.cyan.opacity(0.15), .clear],
@@ -493,6 +482,12 @@ struct AmbientOrbs: View {
                 )
                 .frame(width: 200, height: 200)
                 .offset(x: 80, y: 0)
+                .scaleEffect(1.0 + 0.15 * sin(rotation * .pi / 180))
+                .onAppear {
+                    withAnimation(.linear(duration: 8).repeatForever(autoreverses: false)) {
+                        rotation = 360
+                    }
+                }
         }
     }
 }

@@ -8,10 +8,6 @@ struct ChatSession: Identifiable, Codable {
     var messages: [Message]
     var createdDate: Date
     var lastModified: Date
-    
-    func getPreview() -> String {
-        messages.first(where: { $0.isUser })?.content ?? "Nuova chat"
-    }
 }
 
 // MARK: - Message Model
@@ -70,7 +66,7 @@ class ChatViewModel: ObservableObject {
     // MARK: - Chat Management
     func createNewChat() {
         let newChat = ChatSession(
-            title: "Chat - \(formatDate(Date()))",
+            title: "Nuova chat",
             messages: [],
             createdDate: Date(),
             lastModified: Date()
@@ -86,6 +82,15 @@ class ChatViewModel: ObservableObject {
             messages = chat.messages
             currentChatID = chatID
         }
+    }
+    
+    private func generateChatTitle() -> String {
+        // Prova ad usare il primo messaggio dell'utente
+        if let firstUserMessage = messages.first(where: { $0.isUser })?.content {
+            let preview = String(firstUserMessage.prefix(50))
+            return preview.count < firstUserMessage.count ? preview + "..." : preview
+        }
+        return "Chat senza titolo"
     }
     
     func deleteChat(_ chatID: UUID) {
@@ -172,6 +177,16 @@ class ChatViewModel: ObservableObject {
         if let index = chatSessions.firstIndex(where: { $0.id == currentChatID }) {
             chatSessions[index].messages = messages
             chatSessions[index].lastModified = Date()
+            
+            // Aggiorna il titolo automaticamente dal primo messaggio
+            if chatSessions[index].title == "Nuova chat" || chatSessions[index].title == "Chat senza titolo" {
+                chatSessions[index].title = generateChatTitle()
+            }
+            
+            // Sposta la chat in cima dopo ogni nuovo messaggio
+            let updatedChat = chatSessions.remove(at: index)
+            chatSessions.insert(updatedChat, at: 0)
+            
             saveChats()
         }
     }
@@ -187,11 +202,5 @@ class ChatViewModel: ObservableObject {
            let decoded = try? JSONDecoder().decode([ChatSession].self, from: data) {
             chatSessions = decoded.sorted { $0.lastModified > $1.lastModified }
         }
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy HH:mm"
-        return formatter.string(from: date)
     }
 }
