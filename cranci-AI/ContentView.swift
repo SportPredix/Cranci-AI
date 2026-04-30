@@ -192,7 +192,7 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             Group {
-                if settingsPresented {
+                if settingsPresented || sidebarMounted {
                     SettingsBackgroundView(theme: selectedTheme)
                 } else {
                     AnimatedBackgroundScene(theme: selectedTheme)
@@ -275,7 +275,6 @@ struct ContentView: View {
                         theme: selectedTheme,
                         chatSessions: viewModel.chatSessions,
                         currentChatID: viewModel.currentChatID,
-                        isPresented: sidebarPresented,
                         onSelectChat: { chatID in
                             viewModel.loadChat(chatID)
                             dismissSidebar()
@@ -384,7 +383,7 @@ struct GlassHeader: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            GlassCircleButton(systemName: "line.3.horizontal", action: onMenuTap)
+            ChromeIconButton(systemName: "line.3.horizontal", action: onMenuTap)
 
             ZStack {
                 Circle()
@@ -419,8 +418,8 @@ struct GlassHeader: View {
             Spacer()
 
             HStack(spacing: 10) {
-                GlassCircleButton(systemName: "gearshape.fill", action: onSettingsTap)
-                GlassCircleButton(systemName: "plus", action: onNewChat)
+                ChromeIconButton(systemName: "gearshape.fill", action: onSettingsTap)
+                ChromeIconButton(systemName: "plus", action: onNewChat)
             }
         }
         .padding(.horizontal, 16)
@@ -440,20 +439,22 @@ struct GlassHeader: View {
     }
 }
 
-struct GlassCircleButton: View {
+struct ChromeIconButton: View {
     let systemName: String
-    var size: CGFloat = 36
+    var size: CGFloat = 34
     var iconSize: CGFloat = 16
+    var tint: Color = .white
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: iconSize, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.82))
+                .foregroundStyle(tint.opacity(0.92))
                 .frame(width: size, height: size)
-                .background(.ultraThinMaterial, in: Circle())
         }
+        .buttonStyle(.plain)
+        .contentShape(Rectangle())
     }
 }
 
@@ -516,11 +517,7 @@ struct SettingsView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(.white)
-                    }
+                    ChromeIconButton(systemName: "xmark", action: { dismiss() })
                 }
             }
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -630,6 +627,12 @@ struct ThemeSettingsView: View {
         }
         .navigationTitle("Temi")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                BackToolbarButton()
+            }
+        }
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
     }
@@ -692,8 +695,22 @@ struct AppInfoView: View {
         }
         .navigationTitle("Informazioni App")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                BackToolbarButton()
+            }
+        }
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+}
+
+struct BackToolbarButton: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ChromeIconButton(systemName: "chevron.left", action: { dismiss() })
     }
 }
 
@@ -844,7 +861,6 @@ struct ChatHistorySidebar: View {
     let theme: AppTheme
     let chatSessions: [ChatSession]
     let currentChatID: UUID?
-    let isPresented: Bool
     let onSelectChat: (UUID) -> Void
     let onDeleteChat: (UUID) -> Void
     let onClose: () -> Void
@@ -859,36 +875,23 @@ struct ChatHistorySidebar: View {
 
                 Spacer()
 
-                GlassCircleButton(systemName: "xmark", size: 28, iconSize: 14, action: onClose)
+                ChromeIconButton(systemName: "xmark", size: 30, iconSize: 14, action: onClose)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .opacity(isPresented ? 1 : 0)
-            .offset(x: isPresented ? 0 : -20)
-            .animation(.spring(response: 0.34, dampingFraction: 0.9), value: isPresented)
 
             Divider()
                 .background(.white.opacity(0.1))
-                .opacity(isPresented ? 1 : 0)
-                .animation(.easeOut(duration: 0.22), value: isPresented)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(Array(chatSessions.enumerated()), id: \.element.id) { index, session in
+                    ForEach(chatSessions) { session in
                         ChatHistoryRow(
                             theme: theme,
                             session: session,
                             isSelected: session.id == currentChatID,
                             onSelect: { onSelectChat(session.id) },
                             onDelete: { onDeleteChat(session.id) }
-                        )
-                        .opacity(isPresented ? 1 : 0)
-                        .offset(x: isPresented ? 0 : -26)
-                        .scaleEffect(isPresented ? 1 : 0.95, anchor: .leading)
-                        .animation(
-                            .spring(response: 0.4, dampingFraction: 0.84)
-                                .delay(isPresented ? Double(index) * 0.04 : 0),
-                            value: isPresented
                         )
                     }
                 }
@@ -948,12 +951,13 @@ struct ChatHistoryRow: View {
                 .cornerRadius(10)
             }
 
-            Button(action: { showDeleteConfirm = true }) {
-                Image(systemName: "trash")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.red.opacity(0.7))
-                    .padding(8)
-            }
+            ChromeIconButton(
+                systemName: "trash",
+                size: 28,
+                iconSize: 12,
+                tint: .red,
+                action: { showDeleteConfirm = true }
+            )
             .padding(.trailing, 4)
         }
         .confirmationDialog("Delete Chat", isPresented: $showDeleteConfirm) {
@@ -1002,29 +1006,13 @@ struct GlassInputBar: View {
                 }
 
             Button(action: onSend) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            canSend
-                                ? LinearGradient(
-                                    colors: theme.userBubbleColors,
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                : LinearGradient(
-                                    colors: [Color.white.opacity(0.1), Color.white.opacity(0.1)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                        )
-                        .frame(width: 44, height: 44)
-
-                    Image(systemName: isLoading ? "ellipsis" : "arrow.up")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(canSend ? .white : .white.opacity(0.3))
-                        .symbolEffect(.pulse, isActive: isLoading)
-                }
+                Image(systemName: isLoading ? "ellipsis" : "arrow.up")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(canSend ? .white : .white.opacity(0.3))
+                    .symbolEffect(.pulse, isActive: isLoading)
+                    .frame(width: 44, height: 44)
             }
+            .buttonStyle(.plain)
             .disabled(!canSend)
             .scaleEffect(canSend ? 1 : 0.9)
             .animation(.spring(response: 0.3), value: canSend)
