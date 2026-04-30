@@ -85,10 +85,9 @@ class ChatViewModel: ObservableObject {
     }
     
     private func generateChatTitle() -> String {
-        // Prova ad usare il primo messaggio dell'utente
+        // Usa il primo messaggio dell'utente come titolo
         if let firstUserMessage = messages.first(where: { $0.isUser })?.content {
-            let preview = String(firstUserMessage.prefix(50))
-            return preview.count < firstUserMessage.count ? preview + "..." : preview
+            return firstUserMessage
         }
         return "Chat senza titolo"
     }

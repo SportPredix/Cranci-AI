@@ -108,12 +108,9 @@ struct ContentView: View {
                         },
                         onClose: { sidebarPresented = false }
                     )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .leading).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                    .transition(.move(edge: .leading).combined(with: .opacity))
                 }
-                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: sidebarPresented)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: sidebarPresented)
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
