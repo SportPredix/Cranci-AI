@@ -191,10 +191,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            MeshBackground(theme: selectedTheme)
-                .ignoresSafeArea()
-
-            AmbientOrbs(theme: selectedTheme)
+            AnimatedBackgroundScene(theme: selectedTheme)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -464,10 +461,7 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack {
-            MeshBackground(theme: selectedTheme)
-                .ignoresSafeArea()
-
-            AmbientOrbs(theme: selectedTheme)
+            AnimatedBackgroundScene(theme: selectedTheme)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -876,6 +870,23 @@ struct TypingIndicator: View {
     }
 }
 
+struct AnimatedBackgroundScene: View {
+    let theme: AppTheme
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack {
+                MeshBackground(theme: theme)
+                AmbientOrbs(theme: theme)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .clipped()
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
 struct MeshBackground: View {
     let theme: AppTheme
 
@@ -968,6 +979,7 @@ struct MeshBackground: View {
             .saturation(1.20)
             .contrast(1.05)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func normalizedWave(_ value: Double) -> Double {
@@ -1037,6 +1049,7 @@ struct AmbientOrbs: View {
                 rotation = 360
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
