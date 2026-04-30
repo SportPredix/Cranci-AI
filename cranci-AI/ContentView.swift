@@ -191,7 +191,13 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            AnimatedBackgroundScene(theme: selectedTheme)
+            Group {
+                if settingsPresented {
+                    SettingsBackgroundView(theme: selectedTheme)
+                } else {
+                    AnimatedBackgroundScene(theme: selectedTheme)
+                }
+            }
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -460,64 +466,277 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        ZStack {
-            AnimatedBackgroundScene(theme: selectedTheme)
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                HStack(alignment: .top, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Impostazioni")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
-
-                        Text("Qui troverai tutte le preferenze dell'app. Per ora puoi scegliere il tema.")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.72))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    Spacer()
-
-                    GlassCircleButton(systemName: "xmark", action: { dismiss() })
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .padding(.bottom, 18)
+        NavigationStack {
+            ZStack {
+                SettingsBackgroundView(theme: selectedTheme)
+                    .ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Temi")
-                                .font(.headline)
+                            Text("Impostazioni")
+                                .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
 
-                            Text("Scegli un look per la chat. Il tema viene salvato automaticamente e resta attivo quando riapri l'app.")
+                            Text("Scegli una sezione per personalizzare l'app o vedere le informazioni principali.")
                                 .font(.subheadline)
                                 .foregroundStyle(.white.opacity(0.72))
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
-                        ForEach(AppTheme.allCases) { theme in
-                            ThemeOptionCard(
-                                theme: theme,
-                                isSelected: theme.rawValue == selectedThemeID,
-                                onSelect: {
-                                    withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
-                                        selectedThemeID = theme.rawValue
-                                    }
-                                }
+                        NavigationLink {
+                            ThemeSettingsView(selectedThemeID: $selectedThemeID)
+                        } label: {
+                            SettingsMenuRow(
+                                icon: "paintpalette.fill",
+                                title: "Temi",
+                                subtitle: "Cambia il look della chat e salva il tema attivo.",
+                                accentColors: selectedTheme.userBubbleColors
                             )
                         }
+                        .buttonStyle(.plain)
+
+                        NavigationLink {
+                            AppInfoView(theme: selectedTheme)
+                        } label: {
+                            SettingsMenuRow(
+                                icon: "info.circle.fill",
+                                title: "Informazioni App",
+                                subtitle: "Versione, build e dettagli principali di Cranci AI.",
+                                accentColors: [selectedTheme.accentColors[1], selectedTheme.accentColors[2]]
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, 20)
+                    .padding(.top, 20)
                     .padding(.bottom, 28)
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+struct SettingsMenuRow: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let accentColors: [Color]
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [accentColors[0].opacity(0.95), accentColors[1].opacity(0.9)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 52, height: 52)
+
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.72))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.42))
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+        }
+    }
+}
+
+struct ThemeSettingsView: View {
+    @Binding var selectedThemeID: String
+
+    private var selectedTheme: AppTheme {
+        AppTheme.resolved(id: selectedThemeID)
+    }
+
+    var body: some View {
+        ZStack {
+            SettingsBackgroundView(theme: selectedTheme)
+                .ignoresSafeArea()
+
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Temi")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+
+                        Text("Scegli un look per la chat. Il tema viene salvato automaticamente e resta attivo quando riapri l'app.")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.72))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    ForEach(AppTheme.allCases) { theme in
+                        ThemeOptionCard(
+                            theme: theme,
+                            isSelected: theme.rawValue == selectedThemeID,
+                            onSelect: {
+                                withAnimation(.spring(response: 0.32, dampingFraction: 0.84)) {
+                                    selectedThemeID = theme.rawValue
+                                }
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 28)
+            }
+        }
+        .navigationTitle("Temi")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+}
+
+struct AppInfoView: View {
+    let theme: AppTheme
+
+    private var appName: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+            ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String
+            ?? "Cranci AI"
+    }
+
+    private var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+    }
+
+    private var build: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+    }
+
+    var body: some View {
+        ZStack {
+            SettingsBackgroundView(theme: theme)
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    SettingsInfoCard(title: "App", value: appName, accentColors: theme.userBubbleColors)
+                    SettingsInfoCard(title: "Versione", value: version, accentColors: [theme.accentColors[1], theme.accentColors[2]])
+                    SettingsInfoCard(title: "Build", value: build, accentColors: [theme.accentColors[0], theme.accentColors[2]])
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Descrizione")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+
+                        Text("Cranci AI e una chat app con storico conversazioni, temi personalizzabili e interfaccia animata.")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.72))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(Color.white.opacity(0.08))
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 28)
+            }
+        }
+        .navigationTitle("Informazioni App")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+}
+
+struct SettingsInfoCard: View {
+    let title: String
+    let value: String
+    let accentColors: [Color]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.72))
+
+                Spacer()
+
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [accentColors[0].opacity(0.95), accentColors[1].opacity(0.9)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: 46, height: 8)
+            }
+
+            Text(value)
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+        }
     }
 }
 
@@ -597,7 +816,10 @@ struct ThemeOptionCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+            )
             .overlay {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .strokeBorder(
@@ -867,6 +1089,36 @@ struct TypingIndicator: View {
         }
         .id("typing")
         .onAppear { phase = 2 }
+    }
+}
+
+struct SettingsBackgroundView: View {
+    let theme: AppTheme
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    theme.backgroundColors[0],
+                    theme.backgroundColors[1],
+                    theme.backgroundColors[2]
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(theme.primaryGlowColor.opacity(0.18))
+                .frame(width: 280, height: 280)
+                .blur(radius: 50)
+                .offset(x: 130, y: -220)
+
+            Circle()
+                .fill(theme.secondaryGlowColor.opacity(0.14))
+                .frame(width: 320, height: 320)
+                .blur(radius: 64)
+                .offset(x: -140, y: 260)
+        }
     }
 }
 
