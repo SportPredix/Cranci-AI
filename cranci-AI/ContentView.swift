@@ -241,13 +241,21 @@ struct ChatHistorySidebar: View {
             // Chat List
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach(chatSessions) { session in
+                    ForEach(Array(chatSessions.enumerated()), id: \.element.id) { index, session in
                         ChatHistoryRow(
                             session: session,
                             isSelected: session.id == currentChatID,
                             onSelect: { onSelectChat(session.id) },
                             onDelete: { onDeleteChat(session.id) }
                         )
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .leading)
+                                .combined(with: .opacity)
+                                .combined(with: .scale(scale: 0.8, anchor: .leading)),
+                            removal: .opacity
+                        ))
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8)
+                            .delay(Double(index) * 0.05), value: chatSessions.count)
                     }
                 }
                 .padding(.vertical, 8)
@@ -263,6 +271,17 @@ struct ChatHistorySidebar: View {
                 .fill(.white.opacity(0.08))
                 .frame(width: 0.5)
         }
+        .gesture(
+            DragGesture()
+                .onEnded { value in
+                    // Swipe verso sinistra ( < -50) per chiudere
+                    if value.translation.width < -50 {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            onClose()
+                        }
+                    }
+                }
+        )
     }
 }
 
