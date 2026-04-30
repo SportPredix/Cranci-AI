@@ -108,9 +108,21 @@ struct ContentView: View {
                         },
                         onClose: { sidebarPresented = false }
                     )
-                    .transition(.move(edge: .leading).combined(with: .opacity))
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                // Swipe da destra verso sinistra per chiudere
+                                if value.translation.width < -50 {
+                                    sidebarPresented = false
+                                }
+                            }
+                    )
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .scale(scale: 0.95)).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .scale(scale: 0.95)).combined(with: .opacity)
+                    ))
                 }
-                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: sidebarPresented)
+                .animation(.spring(response: 0.6, dampingFraction: 0.75), value: sidebarPresented)
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
