@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var viewModel = ChatViewModel()
     @FocusState private var isFocused: Bool
+    @State private var sidebarPresented = false
 
     // Vibrant gradient background colors
     private let gradientColors: [Color] = [
@@ -29,7 +30,10 @@ struct ContentView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                GlassHeader(onClear: { viewModel.clearChat() })
+                GlassHeader(
+                    onNewChat: { viewModel.createNewChat() },
+                    onMenuTap: { sidebarPresented.toggle() }
+                )
 
                 // — Messages —
                 ScrollViewReader { proxy in
@@ -82,6 +86,31 @@ struct ContentView: View {
                     }
                 )
             }
+            
+            // — Sidebar —
+            if sidebarPresented {
+                ZStack(alignment: .topLeading) {
+                    // Backdrop
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture { sidebarPresented = false }
+                    
+                    // Sidebar
+                    ChatHistorySidebar(
+                        chatSessions: viewModel.chatSessions,
+                        currentChatID: viewModel.currentChatID,
+                        onSelectChat: { chatID in
+                            viewModel.loadChat(chatID)
+                            sidebarPresented = false
+                        },
+                        onDeleteChat: { chatID in
+                            viewModel.deleteChat(chatID)
+                        },
+                        onClose: { sidebarPresented = false }
+                    )
+                    .transition(.move(edge: .leading))
+                }
+            }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: viewModel.messages.count)
     }
@@ -90,10 +119,20 @@ struct ContentView: View {
 // MARK: - Glass Header
 
 struct GlassHeader: View {
-    let onClear: () -> Void
+    let onNewChat: () -> Void
+    let onMenuTap: () -> Void
 
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 12) {
+            // Hamburger Menu
+            Button(action: onMenuTap) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .frame(width: 36, height: 36)
+                    .background(.ultraThinMaterial, in: Circle())
+            }
+            
             // AI Avatar
             ZStack {
                 Circle()
@@ -125,9 +164,10 @@ struct GlassHeader: View {
 
             Spacer()
 
-            Button(action: onClear) {
-                Image(systemName: "arrow.counterclockwise")
-                    .font(.system(size: 16, weight: .medium))
+            // New Chat Button
+            Button(action: onNewChat) {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.8))
                     .frame(width: 36, height: 36)
                     .background(.ultraThinMaterial, in: Circle())
@@ -145,6 +185,144 @@ struct GlassHeader: View {
                 )
                 .frame(height: 1)
         }
+    }
+}
+
+// MARK: - Chat History Sidebar
+
+struct ChatHistorySidebar: View {
+    let chatSessions: [ChatSession]
+    let currentChatID: UUID?
+    let onSelectChat: (UUID) -> Void
+    let onDeleteChat: (UUID) -> Void
+    let onClose: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            HStack {
+                Text("Cronologia Chat")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                
+                Spacer()
+                
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .frame(width: 28, height: 28)
+                        .background(.ultraThinMaterial, in: Circle())
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            
+            Divider()
+                .background(.white.opacity(0.1))
+            
+            // Chat List
+            ScrollView {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(chatSessions) { session in
+                        ChatHistoryRow(
+                            session: session,
+                            isSelected: session.id == currentChatID,
+                            onSelect: { onSelectChat(session.id) },
+                            onDelete: { onDeleteChat(session.id) }
+                        )
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+            }
+            
+            Spacer()
+        }
+        .frame(maxWidth: 280, alignment: .leading)
+        .background(.ultraThinMaterial)
+        .overlay(alignment: .trailing) {
+            Rectangle()
+                .fill(.white.opacity(0.08))
+                .frame(width: 0.5)
+        }
+    }
+}
+
+// MARK: - Chat History Row
+
+struct ChatHistoryRow: View {
+    let session: ChatSession
+    let isSelected: Bool
+    let onSelect: () -> Void
+    let onDelete: () -> Void
+    
+    @State private var showDeleteConfirm = false
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            Button(action: onSelect) {
+                HStack(alignment: .top, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(session.title)
+                            .font(.system(.caption, design: .default))
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        
+                        Text(session.getPreview())
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .lineLimit(1)
+                        
+                        Text(formatDate(session.lastModified))
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.5))
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    isSelected
+                        ? LinearGradient(colors: [.purple.opacity(0.3), .blue.opacity(0.2)],
+                                       startPoint: .leading,
+                                       endPoint: .trailing)
+                        : LinearGradient(colors: [.clear, .clear],
+                                       startPoint: .leading,
+                                       endPoint: .trailing)
+                )
+                .cornerRadius(10)
+            }
+            
+            // Delete Button
+            Button(action: { showDeleteConfirm = true }) {
+                Image(systemName: "trash")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.red.opacity(0.7))
+                    .padding(8)
+            }
+            .padding(.trailing, 4)
+        }
+        .confirmationDialog("Delete Chat", isPresented: $showDeleteConfirm) {
+            Button("Delete", role: .destructive) {
+                withAnimation {
+                    onDelete()
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to delete this chat?")
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM HH:mm"
+        return formatter.string(from: date)
     }
 }
 
