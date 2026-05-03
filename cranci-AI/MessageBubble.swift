@@ -2,13 +2,12 @@
 //  MessageBubble.swift
 //  cranci-AI
 //
-//  Redesigned for iOS 26 — Liquid Glass + Vibrant Colors
-//
 
 import SwiftUI
 
 struct MessageBubble: View {
     let message: Message
+    let theme: AppTheme
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -22,7 +21,6 @@ struct MessageBubble: View {
         }
     }
 
-    // MARK: User Bubble — vibrant gradient
     private var userBubble: some View {
         VStack(alignment: .trailing, spacing: 4) {
             Text(message.content)
@@ -34,15 +32,12 @@ struct MessageBubble: View {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [
-                                    Color(red: 0.5, green: 0.2, blue: 1.0),
-                                    Color(red: 0.2, green: 0.4, blue: 1.0)
-                                ],
+                                colors: theme.userBubbleColors,
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .shadow(color: .purple.opacity(0.4), radius: 8, x: 0, y: 4)
+                        .shadow(color: theme.userShadowColor, radius: 8, x: 0, y: 4)
                 }
 
             Text(message.timestamp, style: .time)
@@ -52,15 +47,13 @@ struct MessageBubble: View {
         }
     }
 
-    // MARK: AI Bubble — liquid glass
     private var aiBubble: some View {
         HStack(alignment: .bottom, spacing: 8) {
-            // AI Avatar
             ZStack {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [.purple.opacity(0.6), .blue.opacity(0.6)],
+                            colors: theme.aiAvatarColors,
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -73,7 +66,7 @@ struct MessageBubble: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                MarkdownText(content: message.content, isUser: false)
+                MarkdownText(content: message.content, isUser: false, theme: theme)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .background {
