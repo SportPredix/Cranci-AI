@@ -12,7 +12,6 @@ import SwiftUI
 struct MarkdownText: View {
     let content: String
     let isUser: Bool
-    let theme: AppTheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -75,11 +74,8 @@ struct MarkdownText: View {
             HStack(spacing: 8) {
                 Rectangle()
                     .fill(
-                        LinearGradient(
-                            colors: [theme.accentColors[0], theme.accentColors[1]],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+                        LinearGradient(colors: [.purple, .blue],
+                                       startPoint: .top, endPoint: .bottom)
                     )
                     .frame(width: 3)
                     .cornerRadius(2)
